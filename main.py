@@ -54,6 +54,9 @@ def import_shape(event):
 
     draw_shape()
 
+def export_shape(event):
+    pass
+
 # adds dot's coordinates to shape
 def add_to_shape_by_click(event):
     global shape
@@ -103,7 +106,12 @@ def fractal():
         veclength[i] = sqrt(vecn[0]**2 + vecn[1]**2)
         cF[i] = round((vecn[0] * vecf[0] + vecn[1] * vecf[1]) / (veclength[i] * veclength[0]), 4)
         # line's formula that checks whether sin > 0 or < 0
-        if (vecn[0] - vecf[0]) * (-vecf[1]) / (-vecf[0]) + vecf[1] > vecn[1]:
+        if vecf[0] != 0:
+            if (vecn[0] - vecf[0]) * (-vecf[1]) / (-vecf[0]) + vecf[1] > vecn[1]:
+                sF[i] = round(sqrt(1 - cF[i]**2), 8)
+            else:
+                sF[i] = -round(sqrt(1 - cF[i]**2), 8)
+        elif (vecn[0] - vecf[0]) * (-vecf[1]) / (-vecf[0] + 1) + vecf[1] > vecn[1]:
             sF[i] = round(sqrt(1 - cF[i]**2), 8)
         else:
             sF[i] = -round(sqrt(1 - cF[i]**2), 8)
@@ -122,7 +130,7 @@ def fractal():
             int(canvas_output['height']) // 2,
             int(depth_val.get()) - 1
     )
-    change_frac()
+    scale_fractal()
     blit()
 
 # creates a list of coordinates that form a fractal (frac_dts)
@@ -159,7 +167,7 @@ def build_fractal(xn, yn, xe, ye, depth):
     for i in range(1, dotsc):
         build_fractal(coords[i-1][0], coords[i-1][1], coords[i][0], coords[i][1], depth - 1)
 
-def change_frac():
+def scale_fractal():
     global frac_dts
 
     minx, miny = maxx, maxy = frac_dts[0]
@@ -182,8 +190,8 @@ def change_frac():
 
     # print(int(canvas_output['width']), int(canvas_output['height']))
 
-    facX = int(canvas_output['width']) / (maxx - minx)
-    facY = int(canvas_output['height']) / (maxy - miny)
+    facX = (int(canvas_output['width']) + 400) / (maxx - minx)
+    facY = (int(canvas_output['height']) - 20) / (maxy - miny)
     fac = min(facX, facY)
     # print(fac)
 
@@ -201,7 +209,7 @@ def blit():
     canvas_output.delete('all')
 
     if frac_dts != []:
-        change_frac()
+        scale_fractal()
         canvas_output.create_line(*frac_dts)
 
 
@@ -209,7 +217,7 @@ if __name__ == "__main__":
     # root stuff
     root = tk.Tk()
     root.title("Fractal Builder by Vitaly Klimenko")
-    root.minsize(1000, 500)
+    root.minsize(1500, 700)
     root.resizable(width=True, height=True)
 
     # FRAMES
@@ -223,7 +231,7 @@ if __name__ == "__main__":
     frame_input = tk.Frame(
         frame_main,
         width=600,
-        borderwidth=0, relief=RAISED, bg="darkslategrey"
+        borderwidth=0, relief=FLAT, bg="azure4"
     )
     frame_input.pack(fill=Y, side=RIGHT, expand=NO)
 
@@ -235,7 +243,7 @@ if __name__ == "__main__":
     # canvas that displays fractal
     canvas_output = tk.Canvas(
         frame_main,
-        borderwidth=0, relief=FLAT, bg="gainsboro",
+        borderwidth=0, relief=FLAT, bg="azure3",
         highlightthickness=0
     )
     canvas_output.pack(fill=BOTH, side=LEFT, expand=YES)
@@ -244,7 +252,7 @@ if __name__ == "__main__":
     canvas_shape = tk.Canvas(
         frame_input,
         height=300, width=600,
-        borderwidth=0, relief=FLAT, bg="silver"
+        borderwidth=0, relief=FLAT, bg="azure2"
     )
     canvas_shape.pack(fill=BOTH, side=TOP, expand=NO)
     canvas_shape.bind("<ButtonPress-1>", add_to_shape_by_click)
