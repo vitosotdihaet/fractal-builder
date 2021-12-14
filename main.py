@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
 from tkinter.constants import *
-from math import *
+from math import sin, cos, atan, sqrt
 import os
 
 DOT_RADIUS = 4
@@ -19,11 +19,11 @@ def resize(event):
 # clears both canvases
 def clear():
     global shape, frac_dts
-    frac_dts = []
     shape = []
-    canvas_output.delete('all')
     canvas_shape.delete('all')
+    clear_fractal()
 
+# clears fractal canvas
 def clear_fractal():
     global frac_dts
     frac_dts = []
@@ -41,21 +41,25 @@ def import_shape(event):
     try:
         f = open(import_dialog)
     except FileNotFoundError or TypeError:
-        return
+        f = open('err.txt')
 
-    shape = []
+    clear()
     for line in f:
-        print(line)
         shape.append(tuple(map(int, line.split())))
 
     f.close()
-    clear()
 
-    draw_shape(event)
+    draw_shape()
+
+# adds dot's coordinates to shape
+def add_to_shape_by_click(event):
+    global shape
+    shape.append((event.x, event.y))
+    draw_shape()
 
 # draws a shape in canvas_shape 
-def draw_shape(event):
-    shape.append((event.x, event.y))
+def draw_shape():
+    global shape
     x1, y1, x2, y2 = 0, 0, 0, 0
     for c in shape:
         x1 = c[0] - DOT_RADIUS
@@ -74,15 +78,17 @@ def draw_shape(event):
 def build_fractal(xn, yn, xe, ye, depth):
     global frac_dts
     dotsc = len(shape)
+
     if dotsc < 3: return
 
     # print('iter number', depth)
+
     # first dot
     # print('1 dot -', xn, yn)
     coords = [(round(xn, 4), round(yn, 4))]
 
     for i in range(1, dotsc - 1):
-        # calculating next step vector dots
+        # calculating next step vector
         x = xe - xn
         y = ye - yn
         xr = (x * cF[i] + y * sF[i]) * veclengthcomp[i]
@@ -106,22 +112,27 @@ def change_frac():
     global frac_dts
 
     minx, miny = frac_dts[0]
-    maxx, maxy = frac_dts[-1]
+    maxx, maxy = frac_dts[0]
 
     for i in range(len(frac_dts)):
-        minx = min(minx, frac_dts[i][0])
-        miny = min(miny, frac_dts[i][1])
-        maxx = max(maxx, frac_dts[i][0])
-        maxy = max(maxy, frac_dts[i][1])
+        if minx > frac_dts[i][0]:
+            minx = frac_dts[i][0]
+        elif maxx < frac_dts[i][0]:
+            maxx = frac_dts[i][0]
+
+        if miny > frac_dts[i][1]:
+            miny = frac_dts[i][1]
+        elif maxy < frac_dts[i][1]:
+            maxy = frac_dts[i][1]
 
     facX = int(canvas_output['width']) / (maxx - minx)
     facY = int(canvas_output['height']) / (maxy - miny)
     fac = min(facX, facY)
 
     for i in range(len(frac_dts)):
-        frac_dts[i] = ((frac_dts[i][0] - minx) * fac, (frac_dts[i][1] - miny) * fac)
+        frac_dts[i] = ((frac_dts[i][0] - minx) * fac + 10, (frac_dts[i][1] - miny) * fac + 10)
 
-    # print('-----------------')
+    # print('resized fractal:')
     # for e in frac_dts:
     #     print('(' + str(round(e[0])), str(round(e[1])) + ')', end=' ')
     # print()
@@ -137,7 +148,11 @@ def fractal():
 
     x0 = shape[0][0]
     y0 = shape[0][1]
-    vecf = (shape[-1][0] - x0, shape[-1][1] - y0)
+
+    xL = shape[-1][0]
+    yL = shape[-1][1]
+
+    vecf = (xL - x0, yL - y0)
 
     for i in range(1, dotsc):
         xn = shape[i][0]
@@ -146,7 +161,10 @@ def fractal():
 
         veclength[i] = sqrt(vecn[0]**2 + vecn[1]**2)
         cF[i] = round((vecn[0] * vecf[0] + vecn[1] * vecf[1]) / (veclength[i] * veclength[0]), 4)
-        sF[i] = round(sqrt(1 - cF[i]**2), 4)
+        if (vecn[0] - vecf[0]) * (-vecf[1]) / (-vecf[0]) + vecf[1] > vecn[1]:
+            sF[i] = round(sqrt(1 - cF[i]**2), 8)
+        else:
+            sF[i] = -round(sqrt(1 - cF[i]**2), 8)
 
         veclengthcomp[i] = round(veclength[i] / veclength[0], 4)
 
@@ -180,45 +198,47 @@ if __name__ == "__main__":
     root.minsize(1000, 500)
     root.resizable(width=True, height=True)
 
+    # FRAMES
     # main frame
     frame_main = tk.Frame(
         root,
-        borderwidth=0, relief=FLAT, bg="green")
+        borderwidth=0, relief=FLAT)
     frame_main.pack(fill=BOTH, expand=YES)
 
+    # frame with all the inputs
+    frame_input = tk.Frame(
+        frame_main,
+        width=400,
+        borderwidth=0, relief=RAISED, bg="grey40"
+    )
+    frame_input.pack(fill=Y, side=RIGHT, expand=NO)
+
+    # top line
+    frame_top_input = tk.Frame(frame_input, borderwidth=0, relief=FLAT)
+    frame_top_input.pack(side=TOP, expand=NO)
+
+    # CANVASES
     # canvas that displays fractal
     canvas_output = tk.Canvas(
         frame_main,
-        borderwidth=0, relief=FLAT, bg="pink",
+        borderwidth=0, relief=FLAT,
         highlightthickness=0
     )
     canvas_output.pack(fill=BOTH, side=LEFT, expand=YES)
 
-    # frame with all the inputs
-    frame_input = tk.LabelFrame(
-        frame_main,
-        width=400,
-        borderwidth=0, relief=SUNKEN, text="Input", bg="cyan"
-    )
-    frame_input.pack(fill=Y, side=RIGHT, expand=NO)
-
-    frame_params = tk.Frame(frame_input, borderwidth=0, relief=FLAT)
-    frame_params.pack(side=TOP, expand=NO)
-
+    # canvas that contains drawn shape
     canvas_shape = tk.Canvas(
         frame_input,
         height=300,
         borderwidth=0, relief=FLAT, bg="grey"
     )
     canvas_shape.pack(fill=BOTH, side=TOP, expand=NO)
-    canvas_shape.bind("<ButtonPress-1>", draw_shape)
+    canvas_shape.bind("<ButtonPress-1>", add_to_shape_by_click)
 
-    shape = []
-
-# BUTTONS
+    # BUTTONS
     # button for importing shape
     btn_import = tk.Button(
-        frame_params,
+        frame_top_input,
         text="Import shape",
         padx=30, pady=15
     )
@@ -227,7 +247,7 @@ if __name__ == "__main__":
 
     # clear all button
     btn_clear = tk.Button(
-        frame_params,
+        frame_top_input,
         text="Clear",
         command=clear,
         padx=30, pady=15
@@ -239,7 +259,7 @@ if __name__ == "__main__":
         frame_input,
         text="Build fractal",
         command=fractal,
-        padx=100, pady=12
+        width=20, height=2
     )
     btn_build.pack(side=TOP)
 
@@ -248,21 +268,21 @@ if __name__ == "__main__":
         frame_input,
         text="Clear fractal",
         command=clear_fractal,
-        padx=100, pady=12
+        width=20, height=2
     )
     btn_clear_fractal.pack(side=TOP)
 
-    # input box for recursion depth
-    depth_txt = tk.Label(frame_params, text="Depth:")
+    # input box for number of iterations
+    depth_txt = tk.Label(frame_top_input, text="Iterations:")
     depth_txt.pack(side=LEFT)
 
     depth_val = tk.StringVar()
-    depth_str = tk.Entry(frame_params, width=7, textvariable=depth_val)
+    depth_str = tk.Entry(frame_top_input, width=7, textvariable=depth_val)
     depth_str.pack(side=LEFT)
-    depth_val.set("2")
 
     canvas_output.bind("<Configure>", resize)
 
-    blit()
+    shape = []
+    depth_val.set("5")
 
     root.mainloop()
