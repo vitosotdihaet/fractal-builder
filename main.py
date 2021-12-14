@@ -1,20 +1,22 @@
 import tkinter as tk
 from tkinter import filedialog
 from tkinter.constants import *
-from math import sin, cos, atan, sqrt
+from math import sqrt
 import os
 
 DOT_RADIUS = 4
 frac_dts = []
+shape = []
 
 # resizes the window
 def resize(event):
     frame_main['width'] = event.width
     frame_main['height'] = event.height
-    canvas_output['width'] = min(event.width, event.height) - 300
-    canvas_output['height'] = canvas_output['width']
+    canvas_output['width'] = event.width - 600
+    canvas_output['height'] = event.height
 
     blit()
+
 
 # clears both canvases
 def clear():
@@ -29,7 +31,9 @@ def clear_fractal():
     frac_dts = []
     canvas_output.delete('all')
 
+
 # opens a .txt file with shape coordinates [(x, y), (x1, y1)...]
+# where 0 < x < 600 and 0 < y < 300
 def import_shape(event):
     global shape
     import_dialog = filedialog.askopenfilename(
@@ -41,12 +45,11 @@ def import_shape(event):
     try:
         f = open(import_dialog)
     except FileNotFoundError or TypeError:
-        f = open('err.txt')
-
+        f = open(os.path.join(os.getcwd(), 'err.txt'))
     clear()
+
     for line in f:
         shape.append(tuple(map(int, line.split())))
-
     f.close()
 
     draw_shape()
@@ -66,13 +69,61 @@ def draw_shape():
         y1 = c[1] - DOT_RADIUS
         x2 = c[0] + DOT_RADIUS
         y2 = c[1] + DOT_RADIUS
+        canvas_shape.create_oval(x1, y1, x2, y2, fill="black")
 
     if len(shape) > 1:
         canvas_shape.create_line(*shape)
-    canvas_shape.create_oval(x1, y1, x2, y2, fill="black")
 
     # print('---SHAPE---')
     # print(shape)
+
+
+def fractal():
+    global cF, sF, veclength, veclengthcomp
+    dotsc = len(shape)
+
+    sF = [0.0] * dotsc
+    cF = [1.0] * dotsc
+    veclength = [sqrt((shape[-1][0] - shape[0][0])**2 + (shape[-1][1] - shape[0][1])**2)] * dotsc
+    veclengthcomp = [1.0] * dotsc
+
+    x0 = shape[0][0]
+    y0 = shape[0][1]
+
+    xL = shape[-1][0]
+    yL = shape[-1][1]
+
+    vecf = (xL - x0, yL - y0)
+
+    for i in range(1, dotsc):
+        xn = shape[i][0]
+        yn = shape[i][1]
+        vecn = (xn - x0, yn - y0)
+
+        veclength[i] = sqrt(vecn[0]**2 + vecn[1]**2)
+        cF[i] = round((vecn[0] * vecf[0] + vecn[1] * vecf[1]) / (veclength[i] * veclength[0]), 4)
+        # line's formula that checks whether sin > 0 or < 0
+        if (vecn[0] - vecf[0]) * (-vecf[1]) / (-vecf[0]) + vecf[1] > vecn[1]:
+            sF[i] = round(sqrt(1 - cF[i]**2), 8)
+        else:
+            sF[i] = -round(sqrt(1 - cF[i]**2), 8)
+
+        veclengthcomp[i] = round(veclength[i] / veclength[0], 4)
+
+    # print('SINUS AND COSINUS:')
+    # print(sF)
+    # print(cF)
+    # print(veclengthcomp)
+
+    build_fractal(
+            100,
+            int(canvas_output['height']) // 2,
+            int(canvas_output['width']) - 100,
+            int(canvas_output['height']) // 2,
+            int(depth_val.get()) - 1
+    )
+    change_frac()
+    blit()
 
 # creates a list of coordinates that form a fractal (frac_dts)
 def build_fractal(xn, yn, xe, ye, depth):
@@ -111,77 +162,40 @@ def build_fractal(xn, yn, xe, ye, depth):
 def change_frac():
     global frac_dts
 
-    minx, miny = frac_dts[0]
-    maxx, maxy = frac_dts[0]
+    minx, miny = maxx, maxy = frac_dts[0]
 
     for i in range(len(frac_dts)):
-        if minx > frac_dts[i][0]:
-            minx = frac_dts[i][0]
-        elif maxx < frac_dts[i][0]:
-            maxx = frac_dts[i][0]
+        xc, yc = frac_dts[i]
+        if minx > xc:
+            minx = xc
+        elif maxx < xc:
+            maxx = xc
 
-        if miny > frac_dts[i][1]:
-            miny = frac_dts[i][1]
-        elif maxy < frac_dts[i][1]:
-            maxy = frac_dts[i][1]
+        if miny > yc:
+            miny = yc
+        elif maxy < yc:
+            maxy = yc
+
+    # print('min and max:')
+    # print(minx, miny)
+    # print(maxx, maxy)
+
+    # print(int(canvas_output['width']), int(canvas_output['height']))
 
     facX = int(canvas_output['width']) / (maxx - minx)
     facY = int(canvas_output['height']) / (maxy - miny)
     fac = min(facX, facY)
+    # print(fac)
 
     for i in range(len(frac_dts)):
-        frac_dts[i] = ((frac_dts[i][0] - minx) * fac + 10, (frac_dts[i][1] - miny) * fac + 10)
+        frac_dts[i] = (round((frac_dts[i][0] - minx) * fac, 6) + 10,
+                       round((frac_dts[i][1] - miny) * fac, 6) + 10)
 
     # print('resized fractal:')
     # for e in frac_dts:
     #     print('(' + str(round(e[0])), str(round(e[1])) + ')', end=' ')
     # print()
 
-def fractal():
-    global cF, sF, veclength, veclengthcomp
-    dotsc = len(shape)
-
-    sF = [0.0] * dotsc
-    cF = [1.0] * dotsc
-    veclength = [sqrt((shape[-1][0] - shape[0][0])**2 + (shape[-1][1] - shape[0][1])**2)] * dotsc
-    veclengthcomp = [1.0] * dotsc
-
-    x0 = shape[0][0]
-    y0 = shape[0][1]
-
-    xL = shape[-1][0]
-    yL = shape[-1][1]
-
-    vecf = (xL - x0, yL - y0)
-
-    for i in range(1, dotsc):
-        xn = shape[i][0]
-        yn = shape[i][1]
-        vecn = (xn - x0, yn - y0)
-
-        veclength[i] = sqrt(vecn[0]**2 + vecn[1]**2)
-        cF[i] = round((vecn[0] * vecf[0] + vecn[1] * vecf[1]) / (veclength[i] * veclength[0]), 4)
-        if (vecn[0] - vecf[0]) * (-vecf[1]) / (-vecf[0]) + vecf[1] > vecn[1]:
-            sF[i] = round(sqrt(1 - cF[i]**2), 8)
-        else:
-            sF[i] = -round(sqrt(1 - cF[i]**2), 8)
-
-        veclengthcomp[i] = round(veclength[i] / veclength[0], 4)
-
-    # print('SINUS AND COSINUS:')
-    # print(sF)
-    # print(cF)
-    # print(veclengthcomp)
-
-    build_fractal(
-            100,
-            int(canvas_output['height']) // 2,
-            int(canvas_output['width']) - 100,
-            int(canvas_output['height']) // 2,
-            int(depth_val.get()) - 1
-    )
-    change_frac()
-    blit()
 
 def blit():
     canvas_output.delete('all')
@@ -208,8 +222,8 @@ if __name__ == "__main__":
     # frame with all the inputs
     frame_input = tk.Frame(
         frame_main,
-        width=400,
-        borderwidth=0, relief=RAISED, bg="grey40"
+        width=600,
+        borderwidth=0, relief=RAISED, bg="darkslategrey"
     )
     frame_input.pack(fill=Y, side=RIGHT, expand=NO)
 
@@ -221,7 +235,7 @@ if __name__ == "__main__":
     # canvas that displays fractal
     canvas_output = tk.Canvas(
         frame_main,
-        borderwidth=0, relief=FLAT,
+        borderwidth=0, relief=FLAT, bg="gainsboro",
         highlightthickness=0
     )
     canvas_output.pack(fill=BOTH, side=LEFT, expand=YES)
@@ -229,8 +243,8 @@ if __name__ == "__main__":
     # canvas that contains drawn shape
     canvas_shape = tk.Canvas(
         frame_input,
-        height=300,
-        borderwidth=0, relief=FLAT, bg="grey"
+        height=300, width=600,
+        borderwidth=0, relief=FLAT, bg="silver"
     )
     canvas_shape.pack(fill=BOTH, side=TOP, expand=NO)
     canvas_shape.bind("<ButtonPress-1>", add_to_shape_by_click)
@@ -277,12 +291,10 @@ if __name__ == "__main__":
     depth_txt.pack(side=LEFT)
 
     depth_val = tk.StringVar()
+    depth_val.set("5")
     depth_str = tk.Entry(frame_top_input, width=7, textvariable=depth_val)
     depth_str.pack(side=LEFT)
 
     canvas_output.bind("<Configure>", resize)
-
-    shape = []
-    depth_val.set("5")
 
     root.mainloop()
