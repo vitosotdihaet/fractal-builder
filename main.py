@@ -23,6 +23,7 @@ def resize(event):
 def clear():
     clear_shape()
     clear_fractal()
+    shape_name_val.set('')
 
 def clear_shape():
     global shape
