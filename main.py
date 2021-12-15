@@ -7,6 +7,7 @@ import os
 DOT_RADIUS = 4
 frac_dts = []
 shape = []
+temp = []
 
 # resizes the window
 def resize(event):
@@ -20,10 +21,13 @@ def resize(event):
 
 # clears both canvases
 def clear():
-    global shape, frac_dts
+    clear_shape()
+    clear_fractal()
+
+def clear_shape():
+    global shape
     shape = []
     canvas_shape.delete('all')
-    clear_fractal()
 
 # clears fractal canvas
 def clear_fractal():
@@ -55,13 +59,32 @@ def import_shape(event):
     draw_shape()
 
 def export_shape(event):
-    pass
+    if not os.path.exists("shapes"):
+        os.makedirs("shapes")
+
+    f = open(os.path.join("shapes", shape_name_val.get() + '.txt'), 'w')
+
+    for i in range(len(shape)):
+        f.write(str(shape[i][0]) + ' ' + str(shape[i][1]) + '\n')
 
 # adds dot's coordinates to shape
 def add_to_shape_by_click(event):
-    global shape
+    global shape, temp
     shape.append((event.x, event.y))
+    temp = []
     draw_shape()
+
+def undo(event):
+    if len(shape) != 0:
+        temp.append(shape.pop(-1))
+        canvas_shape.delete('all')
+        draw_shape()
+
+def redo(event):
+    if len(temp) != 0:
+        shape.append(temp.pop(-1))
+        canvas_shape.delete('all')
+        draw_shape()
 
 # draws a shape in canvas_shape 
 def draw_shape():
@@ -84,6 +107,7 @@ def draw_shape():
 def fractal():
     global cF, sF, veclength, veclengthcomp
     dotsc = len(shape)
+    if dotsc < 3: return
 
     sF = [0.0] * dotsc
     cF = [1.0] * dotsc
@@ -137,8 +161,6 @@ def fractal():
 def build_fractal(xn, yn, xe, ye, depth):
     global frac_dts
     dotsc = len(shape)
-
-    if dotsc < 3: return
 
     # print('iter number', depth)
 
@@ -239,6 +261,9 @@ if __name__ == "__main__":
     frame_top_input = tk.Frame(frame_input, borderwidth=0, relief=FLAT)
     frame_top_input.pack(side=TOP, expand=NO)
 
+    frame_building = tk.Frame(frame_input, borderwidth=0, relief=FLAT)
+    frame_building.pack(side=TOP, expand=NO, fill=X)
+
     # CANVASES
     # canvas that displays fractal
     canvas_output = tk.Canvas(
@@ -257,51 +282,74 @@ if __name__ == "__main__":
     canvas_shape.pack(fill=BOTH, side=TOP, expand=NO)
     canvas_shape.bind("<ButtonPress-1>", add_to_shape_by_click)
 
+    # frames under input canvas
+    frame_bottom_input = tk.Frame(frame_input, borderwidth=0, relief=FLAT)
+    frame_bottom_input.pack(side=TOP, expand=NO)
+
     # BUTTONS
+    # button that creates and displays a fractal
+    btn_build_fractal = tk.Button(
+        frame_building,
+        text="Build fractal",
+        command=fractal,
+        width=15, height=2
+    )
+    btn_build_fractal.pack(side=LEFT, fill=X)
+
+    # clear fractal button
+    btn_clear_fractal = tk.Button(
+        frame_building,
+        text="Clear fractal",
+        command=clear_fractal,
+        width=15, height=2
+    )
+    btn_clear_fractal.pack(side=RIGHT, fill=X)
+
     # button for importing shape
     btn_import = tk.Button(
-        frame_top_input,
+        frame_bottom_input,
         text="Import shape",
-        padx=30, pady=15
+        width=10, height=2
     )
     btn_import.pack(side=LEFT)
     btn_import.bind("<ButtonPress-1>", import_shape)
 
+    btn_export = tk.Button(
+        frame_bottom_input,
+        text="Export shape",
+        width=10, height=2
+    )
+    btn_export.pack(side=LEFT)
+    btn_export.bind("<ButtonPress-1>", export_shape)
+
     # clear all button
     btn_clear = tk.Button(
-        frame_top_input,
+        frame_bottom_input,
         text="Clear",
         command=clear,
-        padx=30, pady=15
+        width=5, height=2
     )
     btn_clear.pack(side=RIGHT)
 
-    # button that creates and displays a fractal
-    btn_build = tk.Button(
-        frame_input,
-        text="Build fractal",
-        command=fractal,
-        width=20, height=2
-    )
-    btn_build.pack(side=TOP)
-
-    # clear fractal button
-    btn_clear_fractal = tk.Button(
-        frame_input,
-        text="Clear fractal",
-        command=clear_fractal,
-        width=20, height=2
-    )
-    btn_clear_fractal.pack(side=TOP)
-
     # input box for number of iterations
-    depth_txt = tk.Label(frame_top_input, text="Iterations:")
+    depth_txt = tk.Label(frame_building, text="Iterations:")
     depth_txt.pack(side=LEFT)
 
     depth_val = tk.StringVar()
-    depth_val.set("5")
-    depth_str = tk.Entry(frame_top_input, width=7, textvariable=depth_val)
+    depth_val.set('5')
+    depth_str = tk.Entry(frame_building, width=7, textvariable=depth_val)
     depth_str.pack(side=LEFT)
+
+    shape_name_txt = tk.Label(frame_bottom_input, text="Shape name:")
+    shape_name_txt.pack(side=LEFT)
+
+    shape_name_val = tk.StringVar()
+    shape_name_val.set('')
+    shape_name_entry = tk.Entry(frame_bottom_input, width=12, textvariable=shape_name_val)
+    shape_name_entry.pack(side=LEFT)
+
+    root.bind("<Control-z>", undo)
+    root.bind("<Control-Alt-z>", redo)
 
     canvas_output.bind("<Configure>", resize)
 
