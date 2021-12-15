@@ -70,7 +70,19 @@ def export_shape(event):
 # adds dot's coordinates to shape
 def add_to_shape_by_click(event):
     global shape, temp
-    shape.append((event.x, event.y))
+    dotsc = len(shape)
+
+    if dotsc > 0:
+        if event.state == 1: # checks if shift is pressed
+            if abs(event.x - shape[-1][0]) > abs(event.y - shape[-1][1]):
+                shape.append((event.x, shape[-1][1]))
+            else:
+                shape.append((shape[-1][0], event.y))
+        else:
+            shape.append((event.x, event.y))
+    else:
+        shape.append((event.x, event.y))
+
     temp = []
     draw_shape()
 
@@ -257,15 +269,12 @@ if __name__ == "__main__":
     )
     frame_input.pack(fill=Y, side=RIGHT, expand=NO)
 
-    # top line
-    frame_top_input = tk.Frame(frame_input, borderwidth=0, relief=FLAT)
-    frame_top_input.pack(side=TOP, expand=NO)
-
+    # frame with building buttons and parameters
     frame_building = tk.Frame(frame_input, borderwidth=0, relief=FLAT)
     frame_building.pack(side=TOP, expand=NO, fill=X)
 
     # CANVASES
-    # canvas that displays fractal
+    # canvas that displays a fractal
     canvas_output = tk.Canvas(
         frame_main,
         borderwidth=0, relief=FLAT, bg="azure3",
@@ -273,7 +282,7 @@ if __name__ == "__main__":
     )
     canvas_output.pack(fill=BOTH, side=LEFT, expand=YES)
 
-    # canvas that contains drawn shape
+    # canvas that contains a drawn shape
     canvas_shape = tk.Canvas(
         frame_input,
         height=300, width=600,
@@ -282,7 +291,7 @@ if __name__ == "__main__":
     canvas_shape.pack(fill=BOTH, side=TOP, expand=NO)
     canvas_shape.bind("<ButtonPress-1>", add_to_shape_by_click)
 
-    # frames under input canvas
+    # frame under the input canvas
     frame_bottom_input = tk.Frame(frame_input, borderwidth=0, relief=FLAT)
     frame_bottom_input.pack(side=TOP, expand=NO)
 
@@ -314,6 +323,7 @@ if __name__ == "__main__":
     btn_import.pack(side=LEFT)
     btn_import.bind("<ButtonPress-1>", import_shape)
 
+    # button for exporting shapes
     btn_export = tk.Button(
         frame_bottom_input,
         text="Export shape",
@@ -340,6 +350,7 @@ if __name__ == "__main__":
     depth_str = tk.Entry(frame_building, width=7, textvariable=depth_val)
     depth_str.pack(side=LEFT)
 
+    # input box for a file that contains your shape
     shape_name_txt = tk.Label(frame_bottom_input, text="Shape name:")
     shape_name_txt.pack(side=LEFT)
 
