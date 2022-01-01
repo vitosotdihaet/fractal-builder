@@ -74,7 +74,7 @@ def add_to_shape_by_click(event):
     dotsc = len(shape)
 
     if dotsc > 0:
-        if event.state == 1: # checks if shift is pressed
+        if event.state in [1, 9]: # checks if shift is pressed
             if abs(event.x - shape[-1][0]) > abs(event.y - shape[-1][1]):
                 shape.append((event.x, shape[-1][1]))
             else:
@@ -113,12 +113,11 @@ def draw_shape():
     if len(shape) > 1:
         canvas_shape.create_line(*shape)
 
-    # print('---SHAPE---')
-    # print(shape)
-
 
 def fractal():
     global cF, sF, veclength, veclengthcomp
+    clear_fractal()
+
     dotsc = len(shape)
     if dotsc < 3: return
 
@@ -155,11 +154,6 @@ def fractal():
 
         veclengthcomp[i] = round(veclength[i] / veclength[0], 4)
 
-    # print('SINUS AND COSINUS:')
-    # print(sF)
-    # print(cF)
-    # print(veclengthcomp)
-
     build_fractal(
             100,
             int(canvas_output['height']) // 2,
@@ -175,10 +169,7 @@ def build_fractal(xn, yn, xe, ye, depth):
     global frac_dts
     dotsc = len(shape)
 
-    # print('iter number', depth)
-
     # first dot
-    # print('1 dot -', xn, yn)
     coords = [(round(xn, 4), round(yn, 4))]
 
     for i in range(1, dotsc - 1):
@@ -187,11 +178,9 @@ def build_fractal(xn, yn, xe, ye, depth):
         y = ye - yn
         xr = (x * cF[i] + y * sF[i]) * veclengthcomp[i]
         yr = (-x * sF[i] + y * cF[i]) * veclengthcomp[i]
-        # print(i + 1, 'dot -', xr + xn, yr + yn)
         coords.append((round(xr + xn, 4), round(yr + yn, 4)))
 
     # last dot
-    # print(dotsc, 'dot -', xe, ye)
     coords.append((round(xe, 4), round(ye, 4)))
 
     if depth == 0:
@@ -200,7 +189,11 @@ def build_fractal(xn, yn, xe, ye, depth):
         return
 
     for i in range(1, dotsc):
-        build_fractal(coords[i-1][0], coords[i-1][1], coords[i][0], coords[i][1], depth - 1)
+        build_fractal(coords[i-1][0],
+                      coords[i-1][1],
+                      coords[i][0],
+                      coords[i][1],
+                      depth - 1)
 
 def scale_fractal():
     global frac_dts
@@ -219,25 +212,13 @@ def scale_fractal():
         elif maxy < yc:
             maxy = yc
 
-    # print('min and max:')
-    # print(minx, miny)
-    # print(maxx, maxy)
-
-    # print(int(canvas_output['width']), int(canvas_output['height']))
-
     facX = (int(canvas_output['width']) + 400) / (maxx - minx)
     facY = (int(canvas_output['height']) - 20) / (maxy - miny)
     fac = min(facX, facY)
-    # print(fac)
 
     for i in range(len(frac_dts)):
         frac_dts[i] = (round((frac_dts[i][0] - minx) * fac, 6) + 10,
                        round((frac_dts[i][1] - miny) * fac, 6) + 10)
-
-    # print('resized fractal:')
-    # for e in frac_dts:
-    #     print('(' + str(round(e[0])), str(round(e[1])) + ')', end=' ')
-    # print()
 
 
 def blit():
