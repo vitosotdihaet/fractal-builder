@@ -111,7 +111,7 @@ def draw_shape():
         canvas_shape.create_oval(x1, y1, x2, y2, fill="black")
 
     if len(shape) > 1:
-        canvas_shape.create_line(*shape)
+        canvas_shape.create_line(*shape, width=2)
 
 
 def fractal():
