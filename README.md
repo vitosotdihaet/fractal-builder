@@ -13,7 +13,7 @@ and press button [Build fractal]!
 
 [Ctrl + Z] - undo
 
-[Ctrl + Shift + Z] - redo
+[Ctrl + Alt + Z] - redo
 
 
 # Buttons:
