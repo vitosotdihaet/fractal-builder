@@ -18,7 +18,7 @@ and press button [Build fractal]!
 
 # Buttons:
 
-[Build fractal] - builds fractal from drawn
+[Build fractal] - builds fractal from drawn shape
 
 [Clear fractal] - clears the fractal canvas
 
@@ -27,3 +27,15 @@ and press button [Build fractal]!
 [Export shape] - saves the shape to filename.txt file where filename is the text you write before (!) pushing the button 
 
 [Clear] - clears both canvases
+
+# Requirements
+
+Python 3.x
+
+# How to install
+
+Python can be installed in Microsoft store or here -> https://www.python.org/downloads/
+
+To start the programm simply double click the main.py file in file explorer
+
+Enjoy!
