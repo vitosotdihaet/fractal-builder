@@ -232,7 +232,7 @@ def blit():
 if __name__ == "__main__":
     # root stuff
     root = tk.Tk()
-    root.title("Fractal Builder by Vitaly Klimenko")
+    root.title("Fractal Builder")
     root.minsize(1500, 700)
     root.resizable(width=True, height=True)
 
