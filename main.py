@@ -145,15 +145,15 @@ def fractal():
         veclength[i] = sqrt(vecn[0]**2 + vecn[1]**2)
         cF[i] = round((vecn[0] * vecf[0] + vecn[1] * vecf[1]) / (veclength[i] * veclength[0]), 4)
         # line's formula that checks whether sin > 0 or < 0
-        if vecf[0] != 0:
-            if (vecn[0] - vecf[0]) * (-vecf[1]) / (-vecf[0]) + vecf[1] > vecn[1]:
-                sF[i] = round(sqrt(1 - cF[i]**2), 8)
-            else:
-                sF[i] = -round(sqrt(1 - cF[i]**2), 8)
-        elif (vecn[0] - vecf[0]) * (-vecf[1]) / (-vecf[0] + 1) + vecf[1] > vecn[1]:
-            sF[i] = round(sqrt(1 - cF[i]**2), 8)
-        else:
-            sF[i] = -round(sqrt(1 - cF[i]**2), 8)
+        # if vecf[0] != 0:
+        #     if (vecn[0] - vecf[0]) * (-vecf[1]) / (-vecf[0]) + vecf[1] > vecn[1]:
+        sF[i] = round(sqrt(1 - cF[i]**2), 8)
+        #     else:
+        #         sF[i] = -round(sqrt(1 - cF[i]**2), 8)
+        # elif (vecn[0] - vecf[0]) * (-vecf[1]) / (-vecf[0] + 1) + vecf[1] > vecn[1]:
+        #     sF[i] = round(sqrt(1 - cF[i]**2), 8)
+        # else:
+        #     sF[i] = -round(sqrt(1 - cF[i]**2), 8)
 
         veclengthcomp[i] = round(veclength[i] / veclength[0], 4)
 
