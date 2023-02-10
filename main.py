@@ -1,7 +1,10 @@
 import tkinter as tk
+
 from tkinter import filedialog
 from tkinter.constants import *
+
 from math import sqrt
+
 import os
 
 DOT_RADIUS = 4
@@ -155,11 +158,11 @@ def fractal():
         veclengthcomp[i] = round(veclength[i] / veclength[0], 4)
 
     build_fractal(
-            100,
-            int(canvas_output['height']) // 2,
-            int(canvas_output['width']) - 100,
-            int(canvas_output['height']) // 2,
-            int(depth_val.get()) - 1
+        100,
+        int(canvas_output['height']) // 2,
+        int(canvas_output['width']) - 100,
+        int(canvas_output['height']) // 2,
+        int(depth_val.get()) - 1
     )
     scale_fractal()
     blit()
@@ -189,11 +192,13 @@ def build_fractal(xn, yn, xe, ye, depth):
         return
 
     for i in range(1, dotsc):
-        build_fractal(coords[i-1][0],
-                      coords[i-1][1],
-                      coords[i][0],
-                      coords[i][1],
-                      depth - 1)
+        build_fractal(
+            coords[i-1][0],
+            coords[i-1][1],
+            coords[i][0],
+            coords[i][1],
+            depth - 1
+        )
 
 def scale_fractal():
     global frac_dts
@@ -236,46 +241,53 @@ if __name__ == "__main__":
     root.minsize(1500, 700)
     root.resizable(width=True, height=True)
 
-    # FRAMES
+    # FRAMES AND CANVASES
     # main frame
     frame_main = tk.Frame(
         root,
         borderwidth=0, relief=FLAT)
-    frame_main.pack(fill=BOTH, expand=YES)
+    frame_main.pack(expand=YES, fill=BOTH)
 
     # frame with all the inputs
     frame_input = tk.Frame(
         frame_main,
         width=600,
-        borderwidth=0, relief=FLAT, bg="azure4"
+        borderwidth=0, relief=FLAT, bg="grey"
     )
-    frame_input.pack(fill=Y, side=RIGHT, expand=NO)
+    frame_input.pack(side=RIGHT, expand=NO, fill=Y)
 
     # frame with building buttons and parameters
-    frame_building = tk.Frame(frame_input, borderwidth=0, relief=FLAT)
+    frame_building = tk.Frame(
+        frame_input,
+        borderwidth=0,
+        relief=FLAT
+    )
     frame_building.pack(side=TOP, expand=NO, fill=X)
 
-    # CANVASES
     # canvas that displays a fractal
     canvas_output = tk.Canvas(
         frame_main,
-        borderwidth=0, relief=FLAT, bg="azure3",
+        borderwidth=0, relief=FLAT, bg="silver",
         highlightthickness=0
     )
-    canvas_output.pack(fill=BOTH, side=LEFT, expand=YES)
+    canvas_output.pack(side=LEFT, expand=YES, fill=BOTH)
 
     # canvas that contains a drawn shape
     canvas_shape = tk.Canvas(
         frame_input,
         height=300, width=600,
-        borderwidth=0, relief=FLAT, bg="azure2"
+        borderwidth=0, relief=FLAT, bg="white"
     )
-    canvas_shape.pack(fill=BOTH, side=TOP, expand=NO)
+    canvas_shape.pack(side=TOP, expand=NO, fill=BOTH)
     canvas_shape.bind("<ButtonPress-1>", add_to_shape_by_click)
 
     # frame under the input canvas
-    frame_bottom_input = tk.Frame(frame_input, borderwidth=0, relief=FLAT)
-    frame_bottom_input.pack(side=TOP, expand=NO)
+    frame_bottom_input = tk.Frame(
+        frame_input,
+        borderwidth=0,
+        relief=FLAT
+    )
+    frame_bottom_input.pack(side=TOP, expand=NO, fill=X)
 
     # BUTTONS
     # button that creates and displays a fractal
