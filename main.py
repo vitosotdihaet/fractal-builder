@@ -21,7 +21,6 @@ def resize(event):
 
     blit()
 
-
 # clears both canvases
 def clear():
     clear_shape()
@@ -38,7 +37,6 @@ def clear_fractal():
     global frac_dts
     frac_dts = []
     canvas_output.delete('all')
-
 
 # opens a .txt file with shape coordinates [(x, y), (x1, y1)...]
 # where 0 < x < 600 and 0 < y < 300
@@ -345,6 +343,7 @@ if __name__ == "__main__":
     shape_name_entry.pack(side=LEFT)
 
     root.bind("<Control-z>", undo)
+    root.bind("<Control-y>", redo)
     root.bind("<Control-Alt-z>", redo)
 
     canvas_output.bind("<Configure>", resize)
