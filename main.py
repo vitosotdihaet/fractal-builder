@@ -342,6 +342,7 @@ if __name__ == "__main__":
     shape_name_entry = tk.Entry(frame_bottom_input, width=12, textvariable=shape_name_val)
     shape_name_entry.pack(side=LEFT)
 
+    # bind hotkeys
     root.bind("<Control-z>", undo)
     root.bind("<Control-y>", redo)
     root.bind("<Control-Alt-z>", redo)
