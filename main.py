@@ -162,13 +162,13 @@ def fractal():
         int(canvas_output['height']) // 2,
         int(canvas_output['width']) - 100,
         int(canvas_output['height']) // 2,
-        int(depth_val.get()) - 1
+        int(iter_val.get()) - 1
     )
     scale_fractal()
     blit()
 
 # creates a list of coordinates that form a fractal (frac_dts)
-def build_fractal(xn, yn, xe, ye, depth):
+def build_fractal(xn, yn, xe, ye, iter):
     global frac_dts
     dotsc = len(shape)
 
@@ -186,7 +186,7 @@ def build_fractal(xn, yn, xe, ye, depth):
     # last dot
     coords.append((round(xe, 4), round(ye, 4)))
 
-    if depth == 0:
+    if iter == 0:
         for i in range(dotsc):
             frac_dts.append(coords[i])
         return
@@ -197,7 +197,7 @@ def build_fractal(xn, yn, xe, ye, depth):
             coords[i-1][1],
             coords[i][0],
             coords[i][1],
-            depth - 1
+            iter - 1
         )
 
 def scale_fractal():
@@ -336,13 +336,13 @@ if __name__ == "__main__":
     btn_clear.pack(side=RIGHT)
 
     # input box for number of iterations
-    depth_txt = tk.Label(frame_building, text="Iterations:")
-    depth_txt.pack(side=LEFT)
+    iter_txt = tk.Label(frame_building, text="Iterations:")
+    iter_txt.pack(side=LEFT)
 
-    depth_val = tk.StringVar()
-    depth_val.set('5')
-    depth_str = tk.Entry(frame_building, width=7, textvariable=depth_val)
-    depth_str.pack(side=LEFT)
+    iter_val = tk.StringVar()
+    iter_val.set('5')
+    iter_str = tk.Entry(frame_building, width=7, textvariable=iter_val)
+    iter_str.pack(side=LEFT)
 
     # input box for a file that contains your shape
     shape_name_txt = tk.Label(frame_bottom_input, text="Shape name:")
