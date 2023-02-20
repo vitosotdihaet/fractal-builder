@@ -124,14 +124,15 @@ def fractal():
 
     sF = [0.0] * dotsc
     cF = [1.0] * dotsc
-    veclength = [sqrt((shape[-1][0] - shape[0][0])**2 + (shape[-1][1] - shape[0][1])**2)] * dotsc
-    veclengthcomp = [1.0] * dotsc
 
     x0 = shape[0][0]
     y0 = shape[0][1]
 
     xL = shape[-1][0]
     yL = shape[-1][1]
+
+    veclength = [sqrt((xL - x0)**2 + (yL - y0)**2)]
+    veclengthcomp = [1.0]
 
     vecf = (xL - x0, yL - y0)
 
@@ -140,11 +141,11 @@ def fractal():
         yn = shape[i][1]
         vecn = (xn - x0, yn - y0)
 
-        veclength[i] = sqrt(vecn[0]**2 + vecn[1]**2)
+        veclength.append(sqrt(vecn[0]**2 + vecn[1]**2))
+        veclengthcomp.append(round(veclength[i] / veclength[0], 4))
+
         cF[i] = round((vecn[0] * vecf[0] + vecn[1] * vecf[1]) / (veclength[i] * veclength[0]), 4)
         sF[i] = round(sqrt(1 - cF[i]**2), 8)
-
-        veclengthcomp[i] = round(veclength[i] / veclength[0], 4)
 
     build_fractal(
         100,
@@ -164,10 +165,10 @@ def build_fractal(xn, yn, xe, ye, iter):
     # first dot
     coords = [(round(xn, 4), round(yn, 4))]
 
+    x = xe - xn
+    y = ye - yn
     for i in range(1, dotsc - 1):
         # calculating next step vector
-        x = xe - xn
-        y = ye - yn
         xr = (x * cF[i] + y * sF[i]) * veclengthcomp[i]
         yr = (-x * sF[i] + y * cF[i]) * veclengthcomp[i]
         coords.append((round(xr + xn, 4), round(yr + yn, 4)))
@@ -176,8 +177,7 @@ def build_fractal(xn, yn, xe, ye, iter):
     coords.append((round(xe, 4), round(ye, 4)))
 
     if iter == 0:
-        for i in range(dotsc):
-            frac_dts.append(coords[i])
+        frac_dts.extend(coords)
         return
 
     for i in range(1, dotsc):
