@@ -217,7 +217,7 @@ def scale_fractal():
 
     for i in range(len(fractal_dots)):
         fractal_dots[i] = ((fractal_dots[i][0] - minx) * fac + 10,
-                       (fractal_dots[i][1] - miny) * fac + 10)
+                           (fractal_dots[i][1] - miny) * fac + 10)
 
 
 def blit():
