@@ -9,6 +9,8 @@ import os
 
 
 DOT_RADIUS = 4
+SHAPE_WIDTH = 3
+FRACTAL_WIDTH = 2
 
 fractal_dots = []
 shape = []
@@ -117,9 +119,9 @@ def draw_shape():
         canvas_shape.create_oval(x1, y1, x2, y2, fill="black")
 
     if len(shape) > 1:
-        canvas_shape.create_line(*shape, width=2)
+        canvas_shape.create_line(*shape, width=SHAPE_WIDTH)
 
-
+# calculate all the sines and coses, vector lengths, relative vector lengths
 def fractal():
     clear_fractal()
 
@@ -129,48 +131,50 @@ def fractal():
     xf, yf = shape[0]
     xl, yl = shape[-1]
 
-    vecf = x, y = (xl - xf, yl - yf)
+    vecm = x, y = (xl - xf, yl - yf)
 
-    vec_length = [calc_vector_length(vecf)]
-    length_ratio_to_first = [1.0]
+    vec_length = [calc_vector_length(vecm)]
+    length_ratio_to_main = [1.]
 
-    cosinus = [calc_cos(vecf, (1, 0), vec_length[0], 1)]
-    sinuses = [calc_sin(y, cosinus[0])]
+    norm_main_vec_y = y/vec_length[0]
 
-    for i in range(1, dots_count):
+    coses = [1.]
+    sines = [0.]
+
+    for i in range(1, dots_count - 1):
         xn, yn = shape[i]
         vecn = (xn - xf, yn - yf)
 
         vec_length.append(calc_vector_length(vecn))
-        length_ratio_to_first.append(vec_length[i] / vec_length[0])
+        length_ratio_to_main.append(vec_length[i] / vec_length[0])
 
-        cosinus.append(calc_cos(vecn, vecf, vec_length[i], vec_length[0]))
-        sinuses.append(calc_sin(yn - yf, cosinus[i]))
+        norm_i_vec_y = vecn[1]/vec_length[i]
+
+        coses.append(calc_cos(vecn, vecm, vec_length[i], vec_length[0]))
+        sines.append(calc_sin(norm_i_vec_y - norm_main_vec_y, coses[i]))
 
     build_fractal(
+        dots_count,
         xf, yf,
         xl, yl,
-        sinuses, cosinus,
-        length_ratio_to_first,
+        sines, coses,
+        length_ratio_to_main,
         int(iter_val.get()) - 1
     )
     scale_fractal()
     blit()
 
 # creates a list of coordinates that form a fractal (fractal_dots)
-def build_fractal(xn, yn, xe, ye, sinuses, cosinus, length_ratio_to_first, iteration):
+def build_fractal(dots_count, xn, yn, xe, ye, sines, coses, length_ratio_to_main, iteration):
     global fractal_dots
-    dots_count = len(shape)
+    x, y = (xe - xn, ye - yn)
 
     # first dot
     coords = [(xn, yn)]
-
-    x = xe - xn
-    y = ye - yn
     for i in range(1, dots_count - 1):
         # calculating next step vector
-        xr = (x * cosinus[i] + y * sinuses[i]) * length_ratio_to_first[i]
-        yr = (-x * sinuses[i] + y * cosinus[i]) * length_ratio_to_first[i]
+        xr = (x * coses[i] - y * sines[i]) * length_ratio_to_main[i]
+        yr = (x * sines[i] + y * coses[i]) * length_ratio_to_main[i]
         coords.append((xr + xn, yr + yn))
 
     # last dot
@@ -182,10 +186,11 @@ def build_fractal(xn, yn, xe, ye, sinuses, cosinus, length_ratio_to_first, itera
 
     for i in range(1, dots_count):
         build_fractal(
+            dots_count,
             coords[i-1][0], coords[i-1][1],
             coords[i][0], coords[i][1],
-            sinuses, cosinus,
-            length_ratio_to_first,
+            sines, coses,
+            length_ratio_to_main,
             iteration - 1
         )
 
@@ -220,7 +225,7 @@ def blit():
 
     if fractal_dots != []:
         scale_fractal()
-        canvas_output.create_line(*fractal_dots)
+        canvas_output.create_line(*fractal_dots, width=FRACTAL_WIDTH)
 
 
 if __name__ == "__main__":

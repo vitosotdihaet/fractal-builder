@@ -8,5 +8,5 @@ def calc_cos(v1, v2, l1, l2):
 
 def calc_sin(y, cos):
     sin = math.sqrt(1 - cos**2)
-    if y < 0: return sin
-    return -sin
+    if y < 0: return -sin
+    return sin
