@@ -55,7 +55,7 @@ def import_shape(event):
     try:
         f = open(import_dialog)
     except FileNotFoundError or TypeError:
-        f = open(os.path.join(os.getcwd(), 'err.txt'))
+        return
     clear()
 
     for line in f:
