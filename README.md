@@ -5,11 +5,9 @@ change the amount of iterations (recommended is 50 divided by the number of dots
 and press button `Build fractal`!
 
 # UI of the application:
-
-<img src=https://user-images.githubusercontent.com/67521698/185200256-e26bcf7c-bf3a-41c5-b093-9d12bfb2124d.png width=750/>
+<img src=https://user-images.githubusercontent.com/67521698/224414575-a616f4ea-e01a-4cff-a804-ea319f151cfc.png width=1000/>
 
 # Controls:
-
 `Shift` - press it while drawing shape to create horizontal or vertical lines
 
 `Ctrl + Z` - undo
@@ -18,7 +16,6 @@ and press button `Build fractal`!
 
 
 # Buttons:
-
 `Build fractal` - builds fractal from drawn shape
 
 `Clear fractal` - clears the fractal canvas
@@ -30,7 +27,6 @@ and press button `Build fractal`!
 `Clear` - clears both canvases
 
 # Requirements
-
 Python 3.x with Tkinter
 
 # How to install
