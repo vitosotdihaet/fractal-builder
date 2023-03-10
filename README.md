@@ -5,8 +5,7 @@ change the amount of iterations (recommended is 50 divided by the number of dots
 and press button `Build fractal`!
 
 # UI of the application:
-
-<img src=https://user-images.githubusercontent.com/67521698/185200256-e26bcf7c-bf3a-41c5-b093-9d12bfb2124d.png width=750/>
+<img src=https://user-images.githubusercontent.com/67521698/224414006-2a101d8b-846c-48c2-81ac-4a195befa97e.png width=1000/>
 
 # Controls:
 
