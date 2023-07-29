@@ -5,7 +5,7 @@ change the amount of iterations (recommended is 50 divided by the number of dots
 and press button `Build fractal`!
 
 # UI of the application
-<img src=https://user-images.githubusercontent.com/67521698/224414575-a616f4ea-e01a-4cff-a804-ea319f151cfc.png width=1000/>
+<img src=https://github.com/vitosotdihaet/fractal-builder/assets/67521698/8e0d86cc-d393-4df0-9191-18151a72f3af width=1000/>
 
 # Controls
 `Shift` - press it while drawing shape to create horizontal or vertical lines
@@ -30,8 +30,20 @@ and press button `Build fractal`!
 Python 3.x with Tkinter
 
 # How to install
-Python can be installed in Microsoft store or here -> https://www.python.org/downloads/
+## Windows
+Python can be installed in Microsoft store or here -> https://www.python.org/downloads/ (Choose any Python 3 version)
 
-To start the programm simply double click the main.py file in file explorer
+To start a programm, double click `main.py` in file explorer or run the following command in a terminal:
+```cmd
+py main.py
+```
+
+## Unix
+Python almost certainly is pre-installed, otherwise install it with your favorite package manager
+
+To start the programm simply run the following command in a terminal:
+```bash
+$ python3 main.py
+```
 
 Enjoy!
