@@ -216,8 +216,6 @@ def scale_fractal():
     fac = min(facX, facY)
     print(f'factors: {facX}, {facY}')
 
-    # offset = 
-
     for i in range(len(fractal_dots)):
         fractal_dots[i] = ((fractal_dots[i][0] - minx) * fac + PAD_X,
                            (fractal_dots[i][1] - miny) * fac + PAD_Y)
