@@ -66,7 +66,7 @@ def import_shape(event):
 
 def export_shape(event):
     if not os.path.exists('shapes'):
-        os.makedirs('shapes')
+        os.mkdir('shapes')
 
     f = open(os.path.join('shapes', shape_name_val.get() + '.txt'), 'w')
 
