@@ -20,7 +20,7 @@ temp = []
 def resize(event):
     frame_main['width'] = event.width
     frame_main['height'] = event.height
-    canvas_output['width'] = event.width - 600
+    canvas_output['width'] = event.width
     canvas_output['height'] = event.height
 
     blit()
@@ -34,7 +34,7 @@ def clear():
 def clear_shape():
     global shape
     shape = []
-    canvas_shape.delete('all')
+    canvas_shape.delete('shape')
 
 # clears fractal canvas
 def clear_fractal():
@@ -48,8 +48,8 @@ def import_shape(event):
     global shape
     import_dialog = filedialog.askopenfilename(
         initialdir=os.getcwd(),
-        title="Choose a shape that you want",
-        filetypes=(("Text Files", "*.txt"),)
+        title='Choose a shape that you want',
+        filetypes=(('Text Files', '*.txt'),)
     )
 
     try:
@@ -65,10 +65,10 @@ def import_shape(event):
     draw_shape()
 
 def export_shape(event):
-    if not os.path.exists("shapes"):
-        os.makedirs("shapes")
+    if not os.path.exists('shapes'):
+        os.makedirs('shapes')
 
-    f = open(os.path.join("shapes", shape_name_val.get() + '.txt'), 'w')
+    f = open(os.path.join('shapes', shape_name_val.get() + '.txt'), 'w')
 
     for i in range(len(shape)):
         f.write(str(shape[i][0]) + ' ' + str(shape[i][1]) + '\n')
@@ -96,14 +96,14 @@ def add_to_shape_by_click(event):
 def undo(event):
     if len(shape) != 0:
         temp.append(shape.pop(-1))
-        canvas_shape.delete('all')
+        canvas_shape.delete('shape')
         draw_shape()
     fractal()
 
 def redo(event):
     if len(temp) != 0:
         shape.append(temp.pop(-1))
-        canvas_shape.delete('all')
+        canvas_shape.delete('shape')
         draw_shape()
     fractal()
 
@@ -111,17 +111,18 @@ def redo(event):
 def draw_shape():
     global shape
     x1, y1, x2, y2 = 0, 0, 0, 0
+
     for c in shape:
         x1 = c[0] - DOT_RADIUS
         y1 = c[1] - DOT_RADIUS
         x2 = c[0] + DOT_RADIUS
         y2 = c[1] + DOT_RADIUS
-        canvas_shape.create_oval(x1, y1, x2, y2, fill="black")
+        canvas_shape.create_oval(x1, y1, x2, y2, fill='black', tags='shape')
 
     if len(shape) > 1:
-        canvas_shape.create_line(*shape, width=SHAPE_WIDTH)
+        canvas_shape.create_line(*shape, width=SHAPE_WIDTH, tags='shape')
 
-# calculate all the sines and coses, vector lengths, relative vector lengths
+# calculate all the sines and cosines, vector lengths, relative vector lengths
 def fractal():
     clear_fractal()
 
@@ -161,6 +162,7 @@ def fractal():
         length_ratio_to_main,
         int(iter_val.get()) - 1
     )
+
     scale_fractal()
     blit()
 
@@ -187,12 +189,14 @@ def build_fractal(dots_count, xn, yn, xe, ye, sines, coses, length_ratio_to_main
     for i in range(1, dots_count):
         build_fractal(
             dots_count,
-            coords[i-1][0], coords[i-1][1],
+            coords[i - 1][0], coords[i - 1][1],
             coords[i][0], coords[i][1],
             sines, coses,
             length_ratio_to_main,
             iteration - 1
         )
+
+PAD_X, PAD_Y = 50, 50
 
 def scale_fractal():
     global fractal_dots
@@ -201,23 +205,22 @@ def scale_fractal():
 
     for i in range(len(fractal_dots)):
         xc, yc = fractal_dots[i]
-        if minx > xc:
-            minx = xc
-        elif maxx < xc:
-            maxx = xc
+        minx = min(minx, xc)
+        miny = min(miny, yc)
 
-        if miny > yc:
-            miny = yc
-        elif maxy < yc:
-            maxy = yc
+        maxx = max(maxx, xc)
+        maxy = max(maxy, yc)
 
-    facX = (int(canvas_output['width']) + 400) / (maxx - minx)
-    facY = (int(canvas_output['height']) - 20) / (maxy - miny)
+    facX = (int(canvas_output['width']) - 2 * PAD_X) / (maxx - minx)
+    facY = (int(canvas_output['height']) - 2 * PAD_Y) / (maxy - miny)
     fac = min(facX, facY)
+    print(f'factors: {facX}, {facY}')
+
+    # offset = 
 
     for i in range(len(fractal_dots)):
-        fractal_dots[i] = ((fractal_dots[i][0] - minx) * fac + 10,
-                           (fractal_dots[i][1] - miny) * fac + 10)
+        fractal_dots[i] = ((fractal_dots[i][0] - minx) * fac + PAD_X,
+                           (fractal_dots[i][1] - miny) * fac + PAD_Y)
 
 
 def blit():
@@ -228,40 +231,52 @@ def blit():
         canvas_output.create_line(*fractal_dots, width=FRACTAL_WIDTH)
 
 
-if __name__ == "__main__":
+CORD_Y = 15
+
+def update_cord(event):
+    canvas_shape.delete('text')
+
+    w, h = map(int, [canvas_shape['width'], canvas_shape['height']])
+    x, y = event.x, event.y
+
+    canvas_shape.create_text(w // 2, h - CORD_Y,
+                             text=f'{x}, {h - y}', tags='text')
+
+
+if __name__ == '__main__':
     # root stuff
     root = tk.Tk()
-    root.title("Fractal Builder")
-    root.minsize(1500, 700)
+    root.title('Fractal Builder')
+    root.minsize(1200, 500)
     root.resizable(width=True, height=True)
 
     # FRAMES AND CANVASES
     # main frame
     frame_main = tk.Frame(
         root,
-        borderwidth=0, relief=FLAT)
+        borderwidth=0, relief=FLAT
+    )
     frame_main.pack(expand=YES, fill=BOTH)
 
     # frame with all the inputs
     frame_input = tk.Frame(
         frame_main,
         width=600,
-        borderwidth=0, relief=FLAT, bg="grey"
+        borderwidth=0, relief=FLAT, bg='grey'
     )
     frame_input.pack(side=RIGHT, expand=NO, fill=Y)
 
     # frame with building buttons and parameters
     frame_building = tk.Frame(
         frame_input,
-        borderwidth=0,
-        relief=FLAT
+        borderwidth=0, relief=FLAT
     )
     frame_building.pack(side=TOP, expand=NO, fill=X)
 
     # canvas that displays a fractal
     canvas_output = tk.Canvas(
         frame_main,
-        borderwidth=0, relief=FLAT, bg="silver",
+        borderwidth=0, relief=FLAT, bg='silver',
         highlightthickness=0
     )
     canvas_output.pack(side=LEFT, expand=YES, fill=BOTH)
@@ -270,16 +285,16 @@ if __name__ == "__main__":
     canvas_shape = tk.Canvas(
         frame_input,
         height=300, width=600,
-        borderwidth=0, relief=FLAT, bg="white"
+        borderwidth=0, relief=FLAT, bg='white'
     )
     canvas_shape.pack(side=TOP, expand=NO, fill=BOTH)
-    canvas_shape.bind("<ButtonPress-1>", add_to_shape_by_click)
+    canvas_shape.bind('<ButtonPress-1>', add_to_shape_by_click)
+    canvas_shape.bind('<Motion>', update_cord)
 
     # frame under the input canvas
     frame_bottom_input = tk.Frame(
         frame_input,
-        borderwidth=0,
-        relief=FLAT
+        borderwidth=0, relief=FLAT
     )
     frame_bottom_input.pack(side=TOP, expand=NO, fill=X)
 
@@ -287,7 +302,7 @@ if __name__ == "__main__":
     # button that creates and displays a fractal
     btn_build_fractal = tk.Button(
         frame_building,
-        text="Build fractal",
+        text='Build fractal',
         command=fractal,
         width=15, height=2
     )
@@ -296,7 +311,7 @@ if __name__ == "__main__":
     # clear fractal button
     btn_clear_fractal = tk.Button(
         frame_building,
-        text="Clear fractal",
+        text='Clear fractal',
         command=clear_fractal,
         width=15, height=2
     )
@@ -305,32 +320,32 @@ if __name__ == "__main__":
     # button for importing shape
     btn_import = tk.Button(
         frame_bottom_input,
-        text="Import shape",
+        text='Import shape',
         width=10, height=2
     )
     btn_import.pack(side=LEFT)
-    btn_import.bind("<ButtonPress-1>", import_shape)
+    btn_import.bind('<ButtonPress-1>', import_shape)
 
     # button for exporting shapes
     btn_export = tk.Button(
         frame_bottom_input,
-        text="Export shape",
+        text='Export shape',
         width=10, height=2
     )
     btn_export.pack(side=LEFT)
-    btn_export.bind("<ButtonPress-1>", export_shape)
+    btn_export.bind('<ButtonPress-1>', export_shape)
 
     # clear all button
     btn_clear = tk.Button(
         frame_bottom_input,
-        text="Clear",
+        text='Clear',
         command=clear,
         width=5, height=2
     )
     btn_clear.pack(side=RIGHT)
 
     # input box for number of iterations
-    iter_txt = tk.Label(frame_building, text="Iterations:")
+    iter_txt = tk.Label(frame_building, text='Iterations:')
     iter_txt.pack(side=LEFT)
 
     iter_val = tk.StringVar()
@@ -339,7 +354,7 @@ if __name__ == "__main__":
     iter_str.pack(side=LEFT)
 
     # input box for a file that contains your shape
-    shape_name_txt = tk.Label(frame_bottom_input, text="Shape name:")
+    shape_name_txt = tk.Label(frame_bottom_input, text='Shape name:')
     shape_name_txt.pack(side=LEFT)
 
     shape_name_val = tk.StringVar()
@@ -348,10 +363,10 @@ if __name__ == "__main__":
     shape_name_entry.pack(side=LEFT)
 
     # bind hotkeys
-    root.bind("<Control-z>", undo)
-    root.bind("<Control-y>", redo)
-    root.bind("<Control-Alt-z>", redo)
+    root.bind('<Control-z>', undo)
+    root.bind('<Control-y>', redo)
+    root.bind('<Control-Alt-z>', redo)
 
-    canvas_output.bind("<Configure>", resize)
+    canvas_output.bind('<Configure>', resize)
 
     root.mainloop()
