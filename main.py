@@ -214,7 +214,6 @@ def scale_fractal():
     facX = (int(canvas_output['width']) - 2 * PAD_X) / (maxx - minx)
     facY = (int(canvas_output['height']) - 2 * PAD_Y) / (maxy - miny)
     fac = min(facX, facY)
-    print(f'factors: {facX}, {facY}')
 
     for i in range(len(fractal_dots)):
         fractal_dots[i] = ((fractal_dots[i][0] - minx) * fac + PAD_X,
