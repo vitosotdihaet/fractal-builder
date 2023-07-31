@@ -13,13 +13,12 @@ SHAPE_WIDTH = 3
 FRACTAL_WIDTH = 2
 
 fractal_dots = []
+
 shape = []
-temp = []
+shape_history = []
 
 # resizes the window
 def resize(event):
-    frame_main['width'] = event.width
-    frame_main['height'] = event.height
     canvas_output['width'] = event.width
     canvas_output['height'] = event.height
 
@@ -31,12 +30,13 @@ def clear():
     clear_fractal()
     shape_name_val.set('')
 
+# clears input canvas
 def clear_shape():
     global shape
     shape = []
     canvas_shape.delete('shape')
 
-# clears fractal canvas
+# clears output canvas
 def clear_fractal():
     global fractal_dots
     fractal_dots = []
@@ -56,6 +56,7 @@ def import_shape(event):
         f = open(import_dialog)
     except FileNotFoundError or TypeError:
         return
+
     clear()
 
     for line in f:
@@ -75,11 +76,11 @@ def export_shape(event):
 
 # adds dot's coordinates to shape
 def add_to_shape_by_click(event):
-    global shape, temp
+    global shape, shape_history
     dots_count = len(shape)
 
     if dots_count > 0:
-        if event.state in [1, 9]: # checks if shift is pressed
+        if event.state in [1, 9, 17]: # checks if shift is pressed
             if abs(event.x - shape[-1][0]) > abs(event.y - shape[-1][1]):
                 shape.append((event.x, shape[-1][1]))
             else:
@@ -89,20 +90,21 @@ def add_to_shape_by_click(event):
     else:
         shape.append((event.x, event.y))
 
-    temp = []
+    shape_history = []
+
     draw_shape()
     fractal()
 
 def undo(event):
     if len(shape) != 0:
-        temp.append(shape.pop(-1))
+        shape_history.append(shape.pop(-1))
         canvas_shape.delete('shape')
         draw_shape()
     fractal()
 
 def redo(event):
-    if len(temp) != 0:
-        shape.append(temp.pop(-1))
+    if len(shape_history) != 0:
+        shape.append(shape_history.pop(-1))
         canvas_shape.delete('shape')
         draw_shape()
     fractal()
@@ -201,9 +203,12 @@ PAD_X, PAD_Y = 50, 50
 def scale_fractal():
     global fractal_dots
 
+    fractal_dots_count = len(fractal_dots)
+    if fractal_dots_count == 0: return
+
     minx, miny = maxx, maxy = fractal_dots[0]
 
-    for i in range(len(fractal_dots)):
+    for i in range(fractal_dots_count):
         xc, yc = fractal_dots[i]
         minx = min(minx, xc)
         miny = min(miny, yc)
@@ -211,20 +216,28 @@ def scale_fractal():
         maxx = max(maxx, xc)
         maxy = max(maxy, yc)
 
-    facX = (int(canvas_output['width']) - 2 * PAD_X) / (maxx - minx)
-    facY = (int(canvas_output['height']) - 2 * PAD_Y) / (maxy - miny)
+    w, h = int(canvas_output['width']), int(canvas_output['height'])
+
+    facX = (w - 2 * PAD_X) / (maxx - minx)
+    facY = (h - 2 * PAD_Y) / (maxy - miny)
     fac = min(facX, facY)
 
-    for i in range(len(fractal_dots)):
-        fractal_dots[i] = ((fractal_dots[i][0] - minx) * fac + PAD_X,
-                           (fractal_dots[i][1] - miny) * fac + PAD_Y)
+    pad_x = PAD_X
+    pad_y = PAD_Y
+
+    if fac == facX: pad_y = (h - (maxy - miny)) // 2
+    else: pad_x = (w - (maxx - minx)) // 2
+
+    for i in range(fractal_dots_count):
+        fractal_dots[i] = ((fractal_dots[i][0] - minx) * fac + pad_x,
+                           (fractal_dots[i][1] - miny) * fac + pad_y)
 
 
 def blit():
     canvas_output.delete('all')
 
-    if fractal_dots != []:
-        scale_fractal()
+    scale_fractal()
+    if len(fractal_dots) != 0:
         canvas_output.create_line(*fractal_dots, width=FRACTAL_WIDTH)
 
 
@@ -238,6 +251,14 @@ def update_cord(event):
 
     canvas_shape.create_text(w // 2, h - CORD_Y,
                              text=f'{x}, {h - y}', tags='text')
+
+
+FULLSCREEN = False
+
+def fullscreen(event):
+    global FULLSCREEN
+    FULLSCREEN = not FULLSCREEN
+    root.attributes('-fullscreen', FULLSCREEN)
 
 
 if __name__ == '__main__':
@@ -363,6 +384,7 @@ if __name__ == '__main__':
     root.bind('<Control-z>', undo)
     root.bind('<Control-y>', redo)
     root.bind('<Control-Alt-z>', redo)
+    root.bind('<F11>', fullscreen)
 
     canvas_output.bind('<Configure>', resize)
 
